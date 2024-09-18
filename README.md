@@ -71,6 +71,17 @@ The `create_unmanaged_tables` command performs the following steps for each unma
 
 No additional configuration is required. The app uses your project's database configuration as defined in your Django settings.
 
+## Supported Databases
+
+The app supports the following databases:
+
+- SQLite (not tested / experimental)
+- PostgreSQL (not tested / experimental)
+- MySQL (not tested / experimental)
+- Oracle (not tested / experimental)
+- SQL Server (not tested / experimental)
+- MariaDB (not tested / experimental)
+
 ## Limitations
 
 - This app is intended for use with unmanaged models in a local environment only. It will not affect managed models in your project in any way.
