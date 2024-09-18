@@ -1,0 +1,186 @@
+# PIP Installable Pyproject v. 2024.3.7
+# Build Settings
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+# Project Settings
+[project]
+name = "django-unmanaged-assistant"
+version = "2024.09.17"
+description = "A Django app to create databases/schemas/tables for unmanaged models in the local environment."
+authors = ["Hanny <github@hannylicious.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/hannylicious/django-unmanaged-assistant"
+repository = "https://github.com/hannylicious/django-unmanaged-assistant"
+documentation = "https://github.com/hannylicious/django-unmanaged-assistant#readme"
+keywords = ["django", "unmanaged", "tables", "models"]
+
+
+# Coverage Options
+[tool.coverage.run]
+omit = [
+    "__init__.py",
+    ".gitignore",
+    "pre-commit-config.yaml",
+    "pyproject.toml",
+    "README.md",
+    "requirements.txt",
+    "*/__init__.py",
+    "*/package.json",
+    "*tests*",
+    "*/test-results/*",
+    "*/venv/*",
+]
+
+
+# Pytest Options
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = """
+    --nomigrations
+    --reuse-db
+    --cov=django_unmanaged_tables
+    --junitxml=./test-results/junit.xml
+    --cov-report term-missing
+    --cov-report html:./test-results/htmlcov
+    --html=./test-results/test_results.html
+    --self-contained-html
+    -n 4 """
+junit_family = "xunit2"
+norecursedirs = ".svn _build tmp* node_modules"
+python_files = "tests_*.py *_tests.py *_test.py test_*.py test.py tests.py"
+
+
+# Ruff Options
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [".bzr",
+    ".coverage",
+    ".direnv",
+    ".DS_Store",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".log",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "__pycache__",
+    "_build",
+    "blib2to3",
+    "buck-out",
+    "build",
+    "db.sqlite3",
+    "dist",
+    "fixtures",
+    "htmlcov",
+    "migrations",
+    "node_modules",
+    "profiling",
+    "static",
+    "templates",
+    "tests/data",
+    "venv",
+]
+# Settings that should be the same as Black.
+line-length = 79
+# Assume Python 3.12.
+target-version = "py312"
+
+
+# Ruff Formatting Options
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+
+# Ruff Linting Options
+[tool.ruff.lint]
+# Enabled rules
+select = [
+    # flake8-annotations
+    "ANN",
+    # flake8-bugbear
+    "B",
+    # mccabe
+    "C90",
+    # pycodestyle
+    "E",
+    # pyflakes
+    "F",
+    # PEP8-naming
+    "N",
+    # flake8-datetimez
+    "DTZ",
+    # pydocstyle
+    "D",
+    # pyupgrade
+    "UP",
+    # flake8-bandit
+    "S",
+    # flake8-django
+    "DJ",
+    # flake8-pytest-style
+    "PT",
+    # isort
+    "I"
+]
+# Igore pydocstyle rules not relevant to pep257 (https://tinyurl.com/yyz4p3p3).
+# Ignore recommended rules:
+# (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
+ignore = [
+    "ANN101",
+    "D203",
+    "D206",
+    "D212",
+    "D213",
+    "D214",
+    "D215",
+    "D300",
+    "D404",
+    "D405",
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D410",
+    "D411",
+    "D413",
+    "D415",
+    "D416",
+    "D417",
+    "E111",
+    "E114",
+    "E117"
+]
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+
+# McCabe Complexity Options
+[tool.ruff.lint.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+
+# Ruff Per-File Ignores
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["S101"]

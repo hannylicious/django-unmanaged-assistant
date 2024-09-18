@@ -1,0 +1,18 @@
+#------------------- Django -------------------
+Django
+#------------------- Databases -------------------
+psycopg  # PostgreSQL
+# mysqlclient  # MySQL & MariaDB
+oracledb  # Oracle
+pyodbc  # MS SQL Server
+#------------------- Testing -------------------
+coverage
+pytest
+pytest-cov
+pytest-django
+pytest-html
+pytest-xdist
+#------------------- Linting -------------------
+ruff
+#------------------- Tooling -------------------
+pre-commit
