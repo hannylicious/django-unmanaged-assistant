@@ -3,6 +3,8 @@
 Django Unmanaged Assistant is a Django app that provides a management command to create database tables for unmanaged models in your Django
 project.
 
+This app is intended for use in local development environments where you have unmanaged models that need to be reflected in local databases.
+
 ## Features
 
 - Automatically creates tables for unmanaged models in your Django project based on the model definitions
