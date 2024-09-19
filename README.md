@@ -45,13 +45,20 @@ create them or manage scripts for the creation of those tables/views.
        ...
    ]
    ```
-3. Optional: Add the following to your `settings.py` file to map apps with unmanaged models to the appropriate database:
+   
+3. Optional: Add the following to your `settings.py` file to exclude apps that have a path containing the specified string:
+
+    ```python
+    EXCLUDE_UNMANAGED_PATH = 'path/to/exclude'  # default: 'site-packages'
+    ```
+
+4. Optional: Add the following to your `settings.py` file to map apps with unmanaged models to the appropriate database:
 
     ```python
     APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
     ```
 
-4. Optional: Add the following to your `settings.py` file to include unmanaged models from pip-installed packages:
+5. Optional: Add the following to your `settings.py` file to include unmanaged models from pip-installed packages:
 
     ```python
     ADDITIONAL_UNMANAGED_TABLE_APPS = ['app_name']
