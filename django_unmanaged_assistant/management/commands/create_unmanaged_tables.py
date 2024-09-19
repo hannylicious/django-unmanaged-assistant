@@ -5,6 +5,7 @@ from contextlib import ExitStack, contextmanager
 from typing import TextIO
 
 from django.apps import AppConfig, apps
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connections
 from django.db.backends.base.base import BaseDatabaseWrapper
@@ -431,7 +432,7 @@ class Command(BaseCommand):
         """
         self.verbose = options["detailed"]
         for app_config in apps.get_app_configs():
-            if not "site-packages" in app_config.path:
+            if "site-packages" not in app_config.path or app_config.name in settings.ADDITIONAL_UNMANAGED_TABLE_APPS:  # noqa: E501
                 self.collect_unmanaged_models(app_config)
 
         self.process_models()
