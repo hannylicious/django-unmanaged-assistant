@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 # Project Settings
 [project]
 name = "django-unmanaged-assistant"
-version = "2024.09.17"
+version = "2024.09.18"
 description = "A Django app to create databases/schemas/tables for unmanaged models in the local environment."
 authors = [{name="Hanny", email="github@hannylicious.com"},]
 license = {file = "LICENSE"}
