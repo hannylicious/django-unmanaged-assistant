@@ -97,14 +97,33 @@ def table_exists(
         bool: True if the table exists, False otherwise.
     """
     with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT 1
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
-        """,
-            [schema, table],
-        )
+        if connection.vendor == "sqlite":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM sqlite_master
+                WHERE type = 'table' AND name = %s
+            """,
+                [table],
+            )
+        elif connection.vendor == "postgresql":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+            """,
+                [schema, table],
+            )
+        elif connection.vendor == "microsoft":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+            """,
+                [schema, table],
+            )
         return cursor.fetchone() is not None
 
 
