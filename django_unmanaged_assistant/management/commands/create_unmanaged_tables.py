@@ -438,6 +438,15 @@ class Command(BaseCommand):
         self.process_models()
 
     def collect_unmanaged_models(self, app_config: AppConfig) -> None:
+        """
+        Collect unmanaged models from the given app configuration.
+
+        Args:
+            app_config (AppConfig): The Django app configuration.
+
+        Returns:
+            None
+        """
         for model in app_config.get_models():
             if not model._meta.managed:
                 self.models_to_process.append(model)
