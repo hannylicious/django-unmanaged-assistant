@@ -153,14 +153,33 @@ def column_exists(
         django.db.Error: If there's an error executing the SQL query.
     """
     with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT 1
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
-        """,
-            [schema, table, column_name],
-        )
+        if connection.vendor == "sqlite":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM pragma_table_info(%s)
+                WHERE name = %s
+            """,
+                [table, column_name],
+            )
+        elif connection.vendor == "postgresql":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+            """,
+                [schema, table, column_name],
+            )
+        elif connection.vendor == "microsoft":
+            cursor.execute(
+                """
+                SELECT 1
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+            """,
+                [schema, table, column_name],
+            )
         return cursor.fetchone() is not None
 
 
