@@ -275,7 +275,7 @@ def get_column_type(
     column_name: str,
 ) -> str | None:
     """
-    Get the data type of a column in the database.
+    Get the data type of column in the database.
 
     Args:
         connection (BaseDatabaseWrapper): The database connection.
@@ -288,14 +288,33 @@ def get_column_type(
         exist.
     """
     with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT DATA_TYPE
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
-        """,
-            [schema, table, column_name],
-        )
+        if connection.vendor == "sqlite":
+            cursor.execute(
+                """
+                SELECT type
+                FROM pragma_table_info(%s)
+                WHERE name = %s
+            """,
+                [table, column_name],
+            )
+        elif connection.vendor == "postgresql":
+            cursor.execute(
+                """
+                SELECT DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+            """,
+                [schema, table, column_name],
+            )
+        elif connection.vendor == "microsoft":
+            cursor.execute(
+                """
+                SELECT DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+            """,
+                [schema, table, column_name],
+            )
         result = cursor.fetchone()
         return result[0] if result else None
 
