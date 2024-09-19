@@ -1,0 +1,1 @@
+recursive-include django_unmanaged_assistant/management *
