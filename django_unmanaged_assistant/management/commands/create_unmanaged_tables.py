@@ -366,9 +366,7 @@ class Command(BaseCommand):
         """
         self.verbose = options["detailed"]
         for app_config in apps.get_app_configs():
-            if not app_config.path.startswith(
-                apps.get_app_config("django_unmanaged_assistant").path
-            ):
+            if not "site-packages" in app_config.path:
                 self.collect_unmanaged_models(app_config)
 
         self.process_models()
