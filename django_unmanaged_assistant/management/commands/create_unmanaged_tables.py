@@ -85,8 +85,8 @@ def table_exists(
     """
     Check if a table exists in the specified schema.
 
-    This method queries the INFORMATION_SCHEMA.TABLES view to determine
-    if a table with the given name exists in the specified schema.
+    This method queries thd db to determine if a table with the given name
+    exists in the specified schema.
 
     Args:
         connection (BaseDatabaseWrapper): The database connection.
