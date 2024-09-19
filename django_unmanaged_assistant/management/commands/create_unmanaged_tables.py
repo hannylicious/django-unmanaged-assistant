@@ -56,11 +56,25 @@ def create_schema_if_not_exists(
         )
 
     with connection.cursor() as cursor:
-        # Check if the schema exists
-        cursor.execute("SELECT 1 FROM sys.schemas WHERE name = %s", [schema])
-        if cursor.fetchone() is None:
-            # If the schema doesn't exist, create it
-            cursor.execute(f"CREATE SCHEMA [{schema}]")
+        # TODO: Handle schema selection and creation for database backends
+        if connection.vendor == "sqlite":
+            # SQLite does not support schemas in the same way as other
+            # databases, it would require a separate database.
+            return
+        if connection.vendor == "postgresql":
+            # TODO: Verify PostgreSQL schema creation
+            cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+        elif connection.vendor in ["microsoft", "mssql"]:
+            # TODO: Verify Microsoft SQL Server schema creation
+            cursor.execute(
+                "SELECT 1 FROM sys.schemas WHERE name = %s", [schema]
+            )
+            if cursor.fetchone() is None:
+                cursor.execute(f"CREATE SCHEMA [{schema}]")
+        else:
+            raise NotImplementedError(
+                f"Schema creation not implemented for {connection.vendor}"
+            )
 
 
 def table_exists(
