@@ -27,12 +27,8 @@ def get_default_schema(
     """
     if connection.vendor == "postgresql":
         return "public"
-    elif connection.vendor == "mysql":
-        return connection.settings_dict["NAME"]
     elif connection.vendor == "microsoft":
         return "dbo"
-    elif connection.vendor == "oracle":
-        return connection.settings_dict["USER"].upper()
     elif connection.vendor == "sqlite":
         return "main"
     else:
