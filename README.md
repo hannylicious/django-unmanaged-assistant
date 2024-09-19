@@ -77,10 +77,9 @@ The app supports the following databases:
 
 - SQLite (not tested / experimental)
 - PostgreSQL (not tested / experimental)
-- MySQL (not tested / experimental)
-- Oracle (not tested / experimental)
-- SQL Server (not tested / experimental)
-- MariaDB (not tested / experimental)
+- Microsoft SQL Server (not tested / experimental)
+
+If you would like to add support for additional databases, please feel free to submit a Pull Request!
 
 ## Limitations
 
