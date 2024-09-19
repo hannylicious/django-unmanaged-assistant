@@ -357,10 +357,12 @@ def temporary_table_name(
         str: The formatted table name for the model.
     """
     original_db_table = model._meta.db_table
-    schema, table = parse_table_name(connection, original_db_table)
-    formatted_table_name = get_formatted_table_name(connection, schema, table)
-
-    model._meta.db_table = formatted_table_name
+    if not connection.vendor == "sqlite":
+        schema, table = parse_table_name(connection, original_db_table)
+        formatted_table_name = get_formatted_table_name(
+            connection, schema, table
+        )
+        model._meta.db_table = formatted_table_name
     try:
         yield
     finally:
