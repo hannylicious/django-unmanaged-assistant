@@ -465,6 +465,7 @@ class Command(BaseCommand):
         for model in self.models_to_process:
             # Get the default database
             db_alias = "default"
+            # TODO: Add support for dbrouters if they exist?
             if settings.APP_TO_DATABASE_MAPPING:
                 db_name = settings.APP_TO_DATABASE_MAPPING.get(
                     model._meta.app_label
