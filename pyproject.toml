@@ -13,9 +13,6 @@ description = "A Django app to create databases/schemas/tables for unmanaged mod
 authors = [{name="Hanny", email="github@hannylicious.com"},]
 license = {file = "LICENSE"}
 readme = "README.md"
-homepage = "https://github.com/hannylicious/django-unmanaged-assistant"
-repository = "https://github.com/hannylicious/django-unmanaged-assistant"
-documentation = "https://github.com/hannylicious/django-unmanaged-assistant#readme"
 keywords = ["django", "unmanaged", "tables", "models"]
 
 
