@@ -463,7 +463,14 @@ class Command(BaseCommand):
         """
         models_by_connection = {}
         for model in self.models_to_process:
-            db_alias = model._meta.app_label
+            # Get the default database
+            db_alias = "default"
+            if settings.APP_TO_DATABASE_MAPPING:
+                db_name = settings.APP_TO_DATABASE_MAPPING.get(
+                    model._meta.app_label
+                )
+                if db_name:
+                    db_alias = db_name
             connection = connections[db_alias]
             if connection not in models_by_connection:
                 models_by_connection[connection] = []
