@@ -355,7 +355,7 @@ class Command(BaseCommand):
         Handle the management command.
 
         Iterate over all Django app configurations and processes those that
-        do not start with the path of the 'django_unmanaged_tables' app.
+        do not start with the path of the 'django_unmanaged_assistant' app.
 
         Args:
             *args: Variable length argument list.
@@ -367,7 +367,7 @@ class Command(BaseCommand):
         self.verbose = options["detailed"]
         for app_config in apps.get_app_configs():
             if not app_config.path.startswith(
-                apps.get_app_config("django_unmanaged_tables").path
+                apps.get_app_config("django_unmanaged_assistant").path
             ):
                 self.collect_unmanaged_models(app_config)
 
