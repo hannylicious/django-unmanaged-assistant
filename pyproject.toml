@@ -11,7 +11,7 @@ name = "django-unmanaged-assistant"
 version = "2024.09.17"
 description = "A Django app to create databases/schemas/tables for unmanaged models in the local environment."
 authors = ["Hanny <github@hannylicious.com>"]
-license = "MIT"
+license = {file = "LICENSE"}
 readme = "README.md"
 homepage = "https://github.com/hannylicious/django-unmanaged-assistant"
 repository = "https://github.com/hannylicious/django-unmanaged-assistant"
