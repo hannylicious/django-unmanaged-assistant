@@ -335,12 +335,8 @@ def get_formatted_table_name(
     """
     if connection.vendor == "postgresql":
         return f'"{schema}"."{table}"'
-    elif connection.vendor == "mysql":
-        return f"`{schema}`.`{table}`"
     elif connection.vendor in ["microsoft", "mssql"]:
         return f"[{schema}].[{table}]"
-    elif connection.vendor == "oracle":
-        return f'"{schema}"."{table}"'
     else:
         # For other databases, return the unquoted version
         return f"{schema}.{table}"
