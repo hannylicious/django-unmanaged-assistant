@@ -14,6 +14,23 @@ from django.db.models import Field, Model
 from django.db.utils import ProgrammingError
 
 
+def is_app_eligible(app_config: AppConfig) -> bool:
+    """
+    Check if the app is eligible for processing.
+
+    Args:
+        app_config (AppConfig): The Django app configuration.
+
+    Returns:
+        bool: True if the app is eligible for processing, False otherwise.
+    """
+    app_name = app_config.name.split('.')[-1]
+    exclude_path = getattr(settings, 'EXCLUDE_UNMANAGED_PATH', 'site-packages')
+    is_local_app = exclude_path not in app_config.path
+    is_additional_app = app_name in getattr(settings,
+                                            'ADDITIONAL_UNMANAGED_TABLE_APPS',
+                                            [])
+    return is_local_app or is_additional_app
 def get_default_schema(
     connection: BaseDatabaseWrapper,
 ) -> str | None:
@@ -432,7 +449,7 @@ class Command(BaseCommand):
         """
         self.verbose = options["detailed"]
         for app_config in apps.get_app_configs():
-            if "site-packages" not in app_config.path or app_config.name in settings.ADDITIONAL_UNMANAGED_TABLE_APPS:  # noqa: E501
+            if is_app_eligible(app_config):
                 self.collect_unmanaged_models(app_config)
 
         self.process_models()

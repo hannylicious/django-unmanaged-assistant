@@ -3,7 +3,13 @@
 Django Unmanaged Assistant is a Django app that provides a management command to create database tables for unmanaged models in your Django
 project.
 
-This app is intended for use in local development environments where you have unmanaged models that need to be reflected in local databases.
+This app is intended for use in local development environments where you have unmanaged models that need to be reflected in the local database(s).
+
+The app scans through all locally installed apps in your Django project, identifies unmanaged models, and creates tables for these models if they
+don't already exist. It also checks existing tables for missing columns and adds them if necessary.
+
+This app is designed primarily to give you a quick way to create tables locally for unmanaged models in your local database(s) without having to manually
+create them or manage scripts for the creation of those tables/views.
 
 ## Features
 
@@ -39,6 +45,36 @@ This app is intended for use in local development environments where you have un
        ...
    ]
    ```
+3. Optional: Add the following to your `settings.py` file to map apps with unmanaged models to the appropriate database:
+
+    ```python
+    APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
+    ```
+
+4. Optional: Add the following to your `settings.py` file to include unmanaged models from pip-installed packages:
+
+    ```python
+    ADDITIONAL_UNMANAGED_TABLE_APPS = ['app_name']
+    ```
+
+## Multiple Databases
+
+If you have multiple databases in your Django project, you can add the following to your `settings.py` file:
+
+```python
+APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
+```
+This will allow us to make sure we create the tables in the correct database.
+
+## Additional pip-installed packages
+
+By default, the app will only scan through locally installed apps in your Django project. Any app inside the virtual environment (if available) will not be scanned.
+
+Should you want to have unmanaged models from a pip-installed package, you can add the following to your `settings.py` file:
+
+```python
+ADDITIONAL_UNMANAGED_TABLE_APPS = ['app_name']
+```
 
 ## Usage
 
@@ -84,7 +120,7 @@ If you would like to add support for additional databases, please feel free to s
 ## Limitations
 
 - This app is intended for use with unmanaged models in a local environment only. It will not affect managed models in your project in any way.
-- This app should never be used/ran in a staging/production environment as we assume any databases/schemas/tables already exist in those environments.
+- This app should NEVER be used/ran in a staging/production environment as we assume any databases/schemas/tables already exist in those environments.
 - While the app attempts to create appropriate database schema, complex model relationships or custom field types may require manual
   intervention.
 - The app provides warnings about potential type mismatches, but it does not automatically alter existing column types. Such changes should
