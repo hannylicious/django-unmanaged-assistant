@@ -5,10 +5,23 @@ project.
 
 This app is intended for use in local development environments where you have unmanaged models that need to be reflected in the local database(s).
 
+This app is in an alpha state - meaning it is still in development and may have bugs or issues. Please use with caution and report any issues you encounter.
+
+## Problem
+
+When working with Django, you may have unmanaged models in your project that are not automatically created in the database. This can be problematic
+when you need to work with these models in your local environment.
+
+You may or may not have scripts to create these tables, but it can be cumbersome to manage these scripts and ensure they are up-to-date with your models.
+
+## Solution
+
+Instead of trying to 'make the models managed when running locally' (and thus possibly creating/committing migrations you do not want in your repo), you can use Django Unmanaged Assistant to automatically create tables for your unmanaged models.
+
 The app scans through all locally installed apps in your Django project, identifies unmanaged models, and creates tables for these models if they
 don't already exist. It also checks existing tables for missing columns and adds them if necessary.
 
-This app is designed primarily to give you a quick way to create tables locally for unmanaged models in your local database(s) without having to manually
+This app is designed primarily to give you a quick/easy way to create tables locally for unmanaged models in your local database(s) without having to manually
 create them or manage scripts for the creation of those tables/views.
 
 ## Features
@@ -22,6 +35,7 @@ create them or manage scripts for the creation of those tables/views.
 ## Additional Feature
 
 - Create local database(s) command for your Django project (`create_databases`)
+  - This might be useful if you have multiple databases in your Django project and need to create them locally if they don't already exist.
 
 ## Requirements 
 
@@ -53,6 +67,8 @@ These are most likely already handled by your Django project, but just in case:
    ```
    
 3. Optional: Add the following to your `settings.py` file to exclude apps that have a path containing the specified string:
+   - By default, the app will exclude any apps that have a path containing 'site-packages' (i.e., pip-installed packages).
+   - These are strings that are checked against the path of the app. If the path contains the string, the app is excluded from the scan.
 
     ```python
     EXCLUDE_UNMANAGED_PATH = 'path/to/exclude'  # default: 'site-packages'
@@ -65,7 +81,8 @@ These are most likely already handled by your Django project, but just in case:
     ```
 
 5. Optional: Add the following to your `settings.py` file to include unmanaged models from pip-installed packages:
-
+   - Specify specific app names that you want to include in the scan (i.e., pip-installed packages).
+   
     ```python
     ADDITIONAL_UNMANAGED_TABLE_APPS = ['app_name']
     ```
@@ -74,10 +91,12 @@ These are most likely already handled by your Django project, but just in case:
 
 If you have multiple databases in your Django project, you can add the following to your `settings.py` file:
 
+There are currently no checks regarding custom dbrouters, so if you have a custom dbrouter, you may need to adjust the code to accommodate your setup.
+
 ```python
 APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
 ```
-This will allow us to make sure we create the tables in the correct database.
+This will allow us to make sure we create the apps model tables in the correct database.
 
 ## Additional pip-installed packages
 
@@ -91,7 +110,7 @@ ADDITIONAL_UNMANAGED_TABLE_APPS = ['app_name']
 
 ## Usage
 
-After installation, you can use the `create_unmanaged_tables` management command to create tables for your unmanaged models:
+After installation and after the migration of your managed models with migrations, you can use the `create_unmanaged_tables` management command to create tables for your unmanaged models:
 
 ```
 python manage.py create_unmanaged_tables
@@ -107,11 +126,12 @@ This command will:
 
 ## Assumptions
 
-The app assumes that you have already created the database(s) in your local environment. If you haven't created the database(s) yet, you can use the `create_databases` command to create them:
+The app assumes that you have already created the database(s) in your local environment. 
+   - If you haven't created the database(s) yet, you can use the `create_databases` command to create them:
 
 The app assumes you have migrated all of your managed models already.
 
-The app assumes two different styles of naming convention for your tables. If you have a different naming convention, you can reach out to us to see if we can help accommodate your style.
+The app assumes two different styles of naming convention for your tables. If you have a different naming convention, you can reach out to us to see if we can help accommodate your style, or you can submit a Pull Request with the changes.
 1. Unbracketed: `schema.table_name`
 2. Bracketed: `[schema].[table_name]`
 
@@ -128,15 +148,21 @@ The `create_unmanaged_tables` command performs the following steps for each unma
 
 ## Configuration
 
-No additional configuration is required. The app uses your project's database configuration as defined in your Django settings.
+Install the app and add it to your `INSTALLED_APPS` setting in your Django project's settings file.
+
+You can also configure the app by adding the following to your `settings.py` file:
+
+- `EXCLUDE_UNMANAGED_PATH`: A string that is checked against the path of the app. If the path contains the string, the app is excluded from the scan. Default: 'site-packages'
+- `APP_TO_DATABASE_MAPPING`: A dictionary that maps apps with unmanaged models to the appropriate database. Default: 'default'
+- `ADDITIONAL_UNMANAGED_TABLE_APPS`: A list of app names that you want to include in the scan. Default: []
 
 ## Supported Databases
 
 The app supports the following databases:
 
-- SQLite (not tested / experimental)
-- PostgreSQL (not tested / experimental)
-- Microsoft SQL Server (not tested / experimental)
+- SQLite (alpha stages)
+- PostgreSQL (alpha stages)
+- Microsoft SQL Server (alpha stages)
 
 If you would like to add support for additional databases, please feel free to submit a Pull Request!
 
@@ -160,3 +186,8 @@ This project is licensed under the MIT License.
 ## Support
 
 If you encounter any problems or have any questions, please open an issue on the GitHub repository.
+
+Django Unmanaged Assistant is free and always will be. It's developed and maintained in an Open Source manner. Any support is greatly appreciated.
+
+
+```
