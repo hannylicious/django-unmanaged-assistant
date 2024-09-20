@@ -16,7 +16,8 @@ You may or may not have scripts to create these tables, but it can be cumbersome
 
 ## Solution
 
-Instead of trying to 'make the models managed when running locally' (and thus possibly creating/committing migrations you do not want in your repo), you can use Django Unmanaged Assistant to automatically create tables for your unmanaged models.
+Instead of trying to 'make the models managed when running locally', which is commonly suggested (and thus possibly creating/committing migrations you do not want in your repo), 
+you can use Django Unmanaged Assistant to dynamically create tables for your unmanaged models. Then you can use something like 'factory_boy' or other scripts to help generate data for these tables.
 
 The app scans through all locally installed apps in your Django project, identifies unmanaged models, and creates tables for these models if they
 don't already exist. It also checks existing tables for missing columns and adds them if necessary.
@@ -43,7 +44,7 @@ These are most likely already handled by your Django project, but just in case:
 
 - Python 3.6+
 - Django 3.2+
-- psycopg2 / psycopy2-binary (if using PostgreSQL)
+- psycopg2 / psycopg2-binary (if using PostgreSQL)
 - mssql-django (if using Microsoft SQL Server)
 - pyodbc (if using Microsoft SQL Server)
 - The MSSQL ODBC driver installed on the OS (if using Microsoft SQL Server)
@@ -188,6 +189,3 @@ This project is licensed under the MIT License.
 If you encounter any problems or have any questions, please open an issue on the GitHub repository.
 
 Django Unmanaged Assistant is free and always will be. It's developed and maintained in an Open Source manner. Any support is greatly appreciated.
-
-
-```
