@@ -7,11 +7,12 @@ from typing import TextIO
 from django.apps import AppConfig, apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
-from django.db import connections
+from django.db import connections, models
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.models import Field, Model
 from django.db.utils import ProgrammingError
+from psycopg2 import sql
 
 
 def is_app_eligible(app_config: AppConfig) -> bool:
@@ -80,8 +81,11 @@ def create_schema_if_not_exists(
             # databases, it would require a separate database.
             return
         if connection.vendor == "postgresql":
-            # TODO: Verify PostgreSQL schema creation
-            cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+            cursor.execute(
+                sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
+                    sql.Identifier(schema)
+                )
+            )
         elif connection.vendor in ["microsoft", "mssql"]:
             # TODO: Verify Microsoft SQL Server schema creation
             cursor.execute(
@@ -184,8 +188,10 @@ def column_exists(
             cursor.execute(
                 """
                 SELECT 1
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+                FROM information_schema.columns
+                WHERE table_schema = %s
+                  AND table_name = %s
+                  AND column_name = %s
             """,
                 [schema, table, column_name],
             )
@@ -275,14 +281,16 @@ def parse_table_name(
         tuple: (schema, table)
     """
     if "[" in table_name and "]" in table_name:
-        parts = table_name.split(".")
+        parts = table_name.split(".", 1)
         schema = parts[0].strip("[]")
         table = parts[1].strip("[]")
     elif "." in table_name:
-        schema, table = table_name.split(".")
+        schema, table = table_name.split(".", 1)
     else:
         schema = get_default_schema(connection)
         table = table_name
+    schema = schema.strip('"').strip("'")
+    table = table.strip('"').strip("'")
     return schema, table
 
 
@@ -610,6 +618,17 @@ class Command(BaseCommand):
             Exception: If there's an error adding the column to the database.
         """
         column_name = field.db_column or field.name
+
+        # For foreign key fields, append '_id' to the column name
+        # to match the default behavior of Django.
+        if isinstance(field, models.ForeignKey):
+            column_name += "_id"
+
+        if self.verbose:
+            self.stdout.write(
+                f"Checking column '{column_name}' in schema '{schema}', table '{table}'"  # noqa: E501
+            )
+
         if not column_exists(connection, schema, table, column_name):
             if self.verbose:
                 self.stdout.write(
