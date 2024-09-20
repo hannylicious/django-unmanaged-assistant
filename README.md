@@ -23,10 +23,16 @@ create them or manage scripts for the creation of those tables/views.
 
 - Create local database(s) command for your Django project (`create_databases`)
 
-## Requirements
+## Requirements 
+
+These are most likely already handled by your Django project, but just in case:
 
 - Python 3.6+
 - Django 3.2+
+- psycopg2 / psycopy2-binary (if using PostgreSQL)
+- mssql-django (if using Microsoft SQL Server)
+- pyodbc (if using Microsoft SQL Server)
+- The MSSQL ODBC driver installed on the OS (if using Microsoft SQL Server)
 
 ## Installation
 
@@ -98,6 +104,16 @@ This command will:
 3. Create tables for these models if they don't already exist
 4. Check existing tables for missing columns and add them if necessary
 5. Provide warnings about potential type mismatches between model fields and database columns (if ran using `-d` or `--detailed` flag)
+
+## Assumptions
+
+The app assumes that you have already created the database(s) in your local environment. If you haven't created the database(s) yet, you can use the `create_databases` command to create them:
+
+The app assumes you have migrated all of your managed models already.
+
+The app assumes two different styles of naming convention for your tables. If you have a different naming convention, you can reach out to us to see if we can help accommodate your style.
+1. Unbracketed: `schema.table_name`
+2. Bracketed: `[schema].[table_name]`
 
 ## How it works
 
