@@ -12,7 +12,6 @@ from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.models import Field, Model
 from django.db.utils import ProgrammingError
-from psycopg2 import sql
 
 
 def is_app_eligible(app_config: AppConfig) -> bool:
@@ -81,6 +80,7 @@ def create_schema_if_not_exists(
             # databases, it would require a separate database.
             return
         if connection.vendor == "postgresql":
+            from psycopg2 import sql
             cursor.execute(
                 sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
                     sql.Identifier(schema)

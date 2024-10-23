@@ -1,29 +1,44 @@
 # Django Unmanaged Assistant
 
-Django Unmanaged Assistant is a Django app that provides a management command to create database tables for unmanaged models in your Django
+Django Unmanaged Assistant is a Django app that provides a management command 
+to create database tables for unmanaged models in your Django
 project.
 
-This app is intended for use in local development environments where you have unmanaged models that need to be reflected in the local database(s).
+This app is intended for use in local development environments where you have 
+unmanaged models that need to be reflected in the local database(s).
 
-This app is in an alpha state - meaning it is still in development and may have bugs or issues. Please use with caution and report any issues you encounter.
+This app is in an alpha state - meaning it is still in development and may 
+have bugs or issues. Please use with caution and report any issues you 
+encounter.
 
 ## Problem
 
-When working with Django, you may have unmanaged models in your project that are not automatically created in the database. This can be problematic
+When working with Django, you may have unmanaged models in your project whose
+tables are not automatically created in the database. This can be problematic
 when you need to work with these models in your local environment.
 
-You may or may not have scripts to create these tables, but it can be cumbersome to manage these scripts and ensure they are up-to-date with your models.
+You may or may not have scripts to create these tables, but it can be 
+cumbersome to manage these scripts and ensure they are up-to-date with your 
+models.
 
 ## Solution
 
-Instead of trying to 'make the models managed when running locally', which is commonly suggested (and thus possibly creating/committing migrations you do not want in your repo), 
-you can use Django Unmanaged Assistant to dynamically create tables for your unmanaged models. Then you can use something like 'factory_boy' or other scripts to help generate data for these tables.
+Instead of trying to 'make the models managed when running locally', which is 
+commonly suggested (and thus possibly creating/committing migrations you do 
+not want in your repo), you can use Django Unmanaged Assistant to dynamically 
+create tables for your unmanaged models. 
 
-The app scans through all locally installed apps in your Django project, identifies unmanaged models, and creates tables for these models if they
-don't already exist. It also checks existing tables for missing columns and adds them if necessary.
+Then you can use something like 'factory_boy' or other scripts to help 
+generate data for these tables if you need dummy data, or leave them blank.
 
-This app is designed primarily to give you a quick/easy way to create tables locally for unmanaged models in your local database(s) without having to manually
-create them or manage scripts for the creation of those tables/views.
+The app scans through all locally installed apps in your Django project, 
+identifies unmanaged models, and creates tables for these models if they
+don't already exist. It also checks existing tables for missing columns and 
+adds them if necessary.
+
+This app is designed primarily to give you a quick/easy way to create tables 
+locally for unmanaged models in your local database(s) without having to 
+manually create them or manage scripts for the creation of those tables/views.
 
 ## Features
 
@@ -33,7 +48,7 @@ create them or manage scripts for the creation of those tables/views.
 - Warns about potential type mismatches between model fields and database columns (if ran using `-d` or `--detailed` flag)
 - Supports multiple databases
 
-## Additional Feature
+## Additional Features
 
 - Create local database(s) command for your Django project (`create_databases`)
   - This might be useful if you have multiple databases in your Django project and need to create them locally if they don't already exist.
@@ -54,10 +69,11 @@ These are most likely already handled by your Django project, but just in case:
 1. Install the package using pip:
 
    ```
-   pip install django-unmanaged-tables
+   pip install django-unmanaged-assistant
    ```
 
-2. Add `'django_unmanaged_assistant'` to your `INSTALLED_APPS` setting in your Django project's settings file:
+2. Add `'django_unmanaged_assistant'` to your `INSTALLED_APPS` setting in your 
+Django project's settings file:
 
    ```python
    INSTALLED_APPS = [
@@ -67,7 +83,8 @@ These are most likely already handled by your Django project, but just in case:
    ]
    ```
    
-3. Optional: Add the following to your `settings.py` file to exclude apps that have a path containing the specified string:
+3. Optional: Add the following to your `settings.py` file to exclude apps that 
+have a path containing the specified string:
    - By default, the app will exclude any apps that have a path containing 'site-packages' (i.e., pip-installed packages).
    - These are strings that are checked against the path of the app. If the path contains the string, the app is excluded from the scan.
 
@@ -75,7 +92,8 @@ These are most likely already handled by your Django project, but just in case:
     EXCLUDE_UNMANAGED_PATH = 'path/to/exclude'  # default: 'site-packages'
     ```
 
-4. Optional: Add the following to your `settings.py` file to map apps with unmanaged models to the appropriate database:
+4. Optional: Add the following to your `settings.py` file to map apps with 
+unmanaged models to the appropriate database:
 
     ```python
     APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
@@ -95,7 +113,7 @@ If you have multiple databases in your Django project, you can add the following
 There are currently no checks regarding custom dbrouters, so if you have a custom dbrouter, you may need to adjust the code to accommodate your setup.
 
 ```python
-APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database"}
+APP_TO_DATABASE_MAPPING = {"app": "default", "other_app": "additional_database_alias"}
 ```
 This will allow us to make sure we create the apps model tables in the correct database.
 
