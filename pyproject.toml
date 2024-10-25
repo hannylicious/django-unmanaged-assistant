@@ -52,13 +52,13 @@ minversion = "6.0"
 addopts = """
     --nomigrations
     --reuse-db
-    --cov=django_unmanaged_tables
+    --cov=django_unmanaged_assistant
     --junitxml=./test-results/junit.xml
     --cov-report term-missing
     --cov-report html:./test-results/htmlcov
     --html=./test-results/test_results.html
     --self-contained-html
-    -n 4 """
+    """
 junit_family = "xunit2"
 norecursedirs = ".svn _build tmp* node_modules"
 python_files = "tests_*.py *_tests.py *_test.py test_*.py test.py tests.py"

@@ -15,4 +15,5 @@ pytest-xdist
 #------------------- Linting -------------------
 ruff
 #------------------- Tooling -------------------
+ruff-lsp
 pre-commit
