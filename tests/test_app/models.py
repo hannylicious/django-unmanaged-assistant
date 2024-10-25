@@ -1,10 +1,8 @@
-"""Mixed managed/unmanaged models single database."""
+"""Mixed managed/unmanaged models."""
 
 from django.db import models
 
 """
-This module contains mixed models for the multi-db project.
-
 Classes:
     MixedManagedModel: Managed model.
     MixedManagedModelWithId: Managed model with an explicit ID.

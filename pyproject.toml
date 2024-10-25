@@ -50,8 +50,6 @@ omit = [
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = """
-    --nomigrations
-    --reuse-db
     --cov=django_unmanaged_assistant
     --junitxml=./test-results/junit.xml
     --cov-report term-missing

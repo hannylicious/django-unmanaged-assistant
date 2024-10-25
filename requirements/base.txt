@@ -11,6 +11,7 @@ pytest
 pytest-cov
 pytest-django
 pytest-html
+pytest-mock
 pytest-xdist
 #------------------- Linting -------------------
 ruff
