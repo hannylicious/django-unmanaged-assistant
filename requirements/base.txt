@@ -11,8 +11,10 @@ pytest
 pytest-cov
 pytest-django
 pytest-html
+pytest-mock
 pytest-xdist
 #------------------- Linting -------------------
 ruff
 #------------------- Tooling -------------------
+ruff-lsp
 pre-commit

@@ -24,13 +24,15 @@ def is_app_eligible(app_config: AppConfig) -> bool:
     Returns:
         bool: True if the app is eligible for processing, False otherwise.
     """
-    app_name = app_config.name.split('.')[-1]
-    exclude_path = getattr(settings, 'EXCLUDE_UNMANAGED_PATH', 'site-packages')
+    app_name = app_config.name.split(".")[-1]
+    exclude_path = getattr(settings, "EXCLUDE_UNMANAGED_PATH", "site-packages")
     is_local_app = exclude_path not in app_config.path
-    is_additional_app = app_name in getattr(settings,
-                                            'ADDITIONAL_UNMANAGED_TABLE_APPS',
-                                            [])
+    is_additional_app = app_name in getattr(
+        settings, "ADDITIONAL_UNMANAGED_TABLE_APPS", []
+    )
     return is_local_app or is_additional_app
+
+
 def get_default_schema(
     connection: BaseDatabaseWrapper,
 ) -> str | None:
@@ -81,6 +83,7 @@ def create_schema_if_not_exists(
             return
         if connection.vendor == "postgresql":
             from psycopg2 import sql
+
             cursor.execute(
                 sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
                     sql.Identifier(schema)
@@ -395,6 +398,42 @@ def temporary_table_name(
         model._meta.db_table = original_db_table
 
 
+def restore_foreign_keys(original_settings: list[tuple]) -> None:
+    """
+    Restore original FK settings.
+
+    Args:
+        original_settings (list[tuple]): Settings to restore
+    """
+    for field, db_constraint, on_delete in original_settings:
+        field.db_constraint = db_constraint
+        field.remote_field.on_delete = on_delete
+
+
+def handle_foreign_keys(model: type[Model]) -> list[tuple]:
+    """
+    Temporarily disable FK constraints for unmanaged models.
+
+    Args:
+        model (type[Model]): The model to process
+
+    Returns:
+        list[tuple]: List of original FK settings to restore
+    """
+    if model._meta.managed:
+        return []
+
+    original_settings = []
+    for field in model._meta.fields:
+        if isinstance(field, models.ForeignKey):
+            original_settings.append(
+                (field, field.db_constraint, field.remote_field.on_delete)
+            )
+            field.db_constraint = False
+            field.remote_field.on_delete = models.DO_NOTHING
+    return original_settings
+
+
 class Command(BaseCommand):
     """Command to create tables for unmanaged models in the project."""
 
@@ -519,6 +558,49 @@ class Command(BaseCommand):
                             connection, schema_editor, model
                         )
 
+    def create_model_table(
+        self,
+        schema_editor: BaseDatabaseSchemaEditor,
+        model: type[Model],
+        schema: str,
+        table: str,
+    ) -> bool:
+        """
+        Create the table for the model if it doesn't exist.
+
+        Args:
+            schema_editor: The schema editor
+            model: The model to create a table for
+            schema: Database schema name
+            table: Table name
+
+        Returns:
+            bool: True if table created or exists, False if error
+        """
+        if not table_exists(self.connection, schema, table):
+            if self.verbose:
+                self.stdout.write(
+                    self.style.SUCCESS(f"Creating table for {model.__name__}")
+                )
+            try:
+                schema_editor.create_model(model)
+                return True
+            except ProgrammingError as e:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"Error creating table for {model.__name__}: {str(e)}"
+                    )
+                )
+                return False
+        else:
+            if self.verbose:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Table for {model.__name__} already exists"
+                    )
+                )
+            return True
+
     def create_table_for_model(
         self,
         connection: BaseDatabaseWrapper,
@@ -528,60 +610,40 @@ class Command(BaseCommand):
         """
         Create a table for the given model if it does not exist.
 
-        This method attempts to create a database table for the given model.
-        If the table already exists, it processes each field of the model
-        to ensure compatibility.
-
-        Args:
-            connection (BaseDatabaseWrapper): The database connection.
-            schema_editor (BaseDatabaseSchemaEditor): The schema editor for
-            making database changes.
-            model (type[Model]): The Django model class for which to create a
-            table.
-
-        Returns:
-            None
-
-        Raises:
-            ProgrammingError: If there's an error creating the table.
+        For unmanaged models, creates FKs without database constraints.
         """
-        table_name = model._meta.db_table
-        schema, table = parse_table_name(self.connection, table_name)
+        # Handle FK constraints for unmanaged models
+        original_fk_settings = handle_foreign_keys(model)
 
-        if self.verbose:
-            self.stdout.write(
-                f"Processing table '{table}' in schema '{schema}'"
-            )
+        try:
+            # Get table info
+            table_name = model._meta.db_table
+            schema, table = parse_table_name(self.connection, table_name)
 
-        if schema:
-            create_schema_if_not_exists(self.connection, schema)
-
-        if not table_exists(self.connection, schema, table):
             if self.verbose:
                 self.stdout.write(
-                    self.style.SUCCESS(f"Creating table for {model.__name__}")
+                    f"Processing table '{table}' in schema '{schema}'"
                 )
-            try:
-                schema_editor.create_model(model)
-            except ProgrammingError as e:
-                self.stderr.write(
-                    self.style.ERROR(
-                        f"Error creating table for {model.__name__}: {str(e)}"
-                    )
-                )
+
+            # Ensure schema exists
+            if schema:
+                create_schema_if_not_exists(self.connection, schema)
+
+            # Create table if needed
+            if not self.create_model_table(
+                schema_editor, model, schema, table
+            ):
                 return
-        else:
-            if self.verbose:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Table for {model.__name__} already exists"
-                    )
+
+            # Process fields
+            for field in model._meta.fields:
+                self.process_field(
+                    connection, schema_editor, model, schema, table, field
                 )
 
-        for field in model._meta.fields:
-            self.process_field(
-                connection, schema_editor, model, schema, table, field
-            )
+        finally:
+            # Restore original FK settings
+            restore_foreign_keys(original_fk_settings)
 
     def process_field(
         self,
@@ -592,41 +654,22 @@ class Command(BaseCommand):
         table: str,
         field: Field,
     ) -> None:
-        """
-        Process a field for the given model and table.
-
-        This method checks if the column for the field exists in the database
-        table.
-
-        If it doesn't exist, it attempts to add the column. If it does exist,
-        it checks for compatibility between the existing column and the field.
-
-        Args:
-            connection (BaseDatabaseWrapper): The database
-            connection.
-            schema_editor (BaseDatabaseSchemaEditor): The schema editor for
-            making database changes.
-            model (Model): The Django model class.
-            schema (str): The database schema name.
-            table (str): The database table name.
-            field (Field): The Django model field to process.
-
-        Returns:
-            None
-
-        Raises:
-            Exception: If there's an error adding the column to the database.
-        """
+        """Process a field for the given model and table."""
+        # Get the base column name from the field
         column_name = field.db_column or field.name
 
-        # For foreign key fields, append '_id' to the column name
-        # to match the default behavior of Django.
+        # For foreign key fields, be smarter about the column name
         if isinstance(field, models.ForeignKey):
-            column_name += "_id"
+            # If db_column is set, use it exactly as specified
+            if field.db_column:
+                column_name = field.db_column
+            # If no db_column is set, append '_id' only if it's not already there
+            elif not column_name.endswith("_id"):
+                column_name += "_id"
 
         if self.verbose:
             self.stdout.write(
-                f"Checking column '{column_name}' in schema '{schema}', table '{table}'"  # noqa: E501
+                f"Checking column '{column_name}' in schema '{schema}', table '{table}'"
             )
 
         if not column_exists(connection, schema, table, column_name):
@@ -637,7 +680,16 @@ class Command(BaseCommand):
                     )
                 )
             try:
+                # Store original db_column
+                original_db_column = field.db_column
+                # Temporarily set db_column to match what we want
+                field.db_column = column_name
+
                 schema_editor.add_field(model, field)
+
+                # Restore original db_column
+                field.db_column = original_db_column
+
             except Exception as e:
                 self.stderr.write(
                     self.style.ERROR(
