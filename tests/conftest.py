@@ -8,6 +8,7 @@ from typing import Any
 import django
 import pytest
 from django.conf import settings
+from django.core import management
 from django.db import connections
 from django.db.backends.base.base import BaseDatabaseWrapper
 
@@ -28,9 +29,15 @@ from tests.test_app.models import (
 )
 
 
+@pytest.fixture(autouse=True)
+def setup_management_command() -> None:
+    """Register the management command for testing."""
+    commands = management.get_commands()
+    commands["create_unmanaged_tables"] = "django_unmanaged_assistant"
+
+
 def pytest_configure() -> None:
     """Configure Django settings for tests."""
-    # Settings are already configured above, so this is just a hook for pytest
     pass
 
 
